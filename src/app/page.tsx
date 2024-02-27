@@ -1,18 +1,7 @@
 "use client";
-import { useState } from "react";
 import axios from "axios";
-import { Document, Page, pdfjs } from "react-pdf";
-import "react-pdf/dist/Page/TextLayer.css";
-import "react-pdf/dist/Page/AnnotationLayer.css";
-
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const Home = () => {
-  const [pdfData, setPdfData] = useState<Blob | null>(null);
-
-  const [numPages, setNumPages] = useState<number>();
-  const [pageNumber, setPageNumber] = useState<number>(1);
-
   const fetchData = async () => {
     try {
       const { data } = await axios.get("api/");
@@ -27,34 +16,24 @@ const Home = () => {
       // reader.readAsText(blob);
       //Para Ler o Binario PDF****************************************
 
-      setPdfData(blob);
+      const url = URL.createObjectURL(blob);
+      const iframe = document.getElementById("iframe") as HTMLIFrameElement;
+      if (iframe) iframe.src = url;
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
     }
   };
 
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
-    setNumPages(numPages);
-  }
   return (
     <div>
       <button
         type="button"
         onClick={fetchData}
-        className="bg-slate-700 p-4 rounded-lg hover:opacity-75 text-white"
+        className="p-2 text-white bg-slate-500 hover:opacity-75"
       >
         Baixar Pdf
       </button>
-      {pdfData && (
-        <>
-          <Document file={pdfData} onLoadSuccess={onDocumentLoadSuccess}>
-            <Page pageNumber={pageNumber} />
-          </Document>
-          <p>
-            Page {pageNumber} of {numPages}
-          </p>
-        </>
-      )}
+      <iframe className="w-96 h-[600px]" id="iframe" />
     </div>
   );
 };
